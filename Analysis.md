@@ -1,0 +1,394 @@
+# 1. Analysis
+
+# AI Menu Recommendation System
+#### AI 기반 대화형 메뉴 추천 시스템
+| 항목 | 내용 |
+|------|------|
+| Student No | 22413551 |
+| Name | 김혜원 |
+| E-mail | kimhyeone@yu.ac.kr |
+---
+
+## Revision History
+
+| Revision date | Version # | Description | Author |
+|---------------|-----------|-------------|--------|
+| 2026/05/08 | 1.00 | First Documentation | 김혜원 |
+---
+
+## Contents
+
+- [1. Introduction](#intro)
+- [2. Use Case Analysis](#uca)
+- [3. Domain Analysis](#domain)
+- [4. User Interface Prototype](#uip)
+- [5. Glossary](#glossary)
+- [6. References](#ref)
+
+---
+
+## 1. Introduction <a name="intro"></a>
+현대 사회를 살아가는 사람들은 하루에도 여러 번 “오늘 뭐 먹지?”라는 고민을 반복한다. 식사는 단순히 배를 채우는 행위를 넘어 개인의 건강 상태, 기분, 경제적 상황, 일정, 날씨, 동행 여부 등 다양한 요소의 영향을 받기 때문에 메뉴를 선택하는 과정은 생각보다 많은 시간과 스트레스를 유발한다. 특히 배달 애플리케이션과 맛집 플랫폼의 발달로 음식 정보와 선택지가 지나치게 많아지면서 오히려 사용자가 결정을 내리지 못하는 현상이 빈번하게 발생하고 있다.
+
+또한 기존의 메뉴 추천 서비스들은 단순 랜덤 추천이나 카테고리 기반 추천에 머무르는 경우가 많아 사용자의 현재 상황이나 감정, 건강 상태와 같은 맥락적 요소를 충분히 반영하지 못한다. 예를 들어 “느끼하지 않은 음식”, “가볍지만 든든한 음식”, “매운 건 싫지만 스트레스는 풀고 싶은 음식”과 같은 자연어 표현은 사람마다 기준이 다르기 때문에 단순 키워드 매칭만으로는 만족도 높은 추천을 제공하기 어렵다. 특히 채식주의자, 다이어트 사용자, 알레르기 보유자처럼 식단 제한 조건이 있는 경우에는 선택 가능한 메뉴 범위가 크게 줄어들어 메뉴 선택 과정의 피로도가 더욱 증가한다.
+
+이러한 문제를 해결하기 위해 사용자의 상황과 취향을 자연어 기반으로 이해하고 분석하는 ‘AI 기반 대화형 메뉴 추천 시스템’을 제안한다. 본 시스템은 사용자가 현재 상태와 원하는 조건을 대화 형태로 입력하면 AI가 이를 분석하여 적절한 메뉴를 추천하며, 건강 정보·기피 음식·선호도 등을 종합적으로 반영한 개인화 추천 기능을 제공한다. 또한 추천 결과에 만족하지 못할 경우 추가 대화를 통해 재추천을 수행함으로써 보다 자연스럽고 유연한 사용자 경험을 지원한다. 이를 통해 사용자는 반복적인 메뉴 선택 스트레스를 줄이고 자신에게 가장 적합한 식사를 빠르고 효율적으로 결정할 수 있을 것이다.
+
+
+---
+## 2. Use Case Analysis <a name="uca"></a>
+
+
+
+## Use Case #1 : Register
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | 신규 사용자가 AI 메뉴 추천 시스템에 회원가입하기 위해 사용하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | User Level |
+| Author | 김혜원 |
+| Last Update | 2026-05-08 |
+| Status | Analysis |
+| Primary Actor | User |
+| Preconditions | 시스템이 실행 중이어야 하며 기존 계정이 없어야 한다. |
+| Trigger | 사용자가 회원가입 버튼을 선택한다. |
+| Success Post Condition | 사용자 계정 생성이 완료되고 건강 정보 입력 화면으로 이동한다. |
+| Failed Post Condition | 회원가입에 실패하고 로그인 화면으로 돌아간다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 사용자가 회원가입을 시도할 때 시작된다. |
+| 1 | 사용자는 회원가입 화면으로 이동한다. |
+| 2 | 사용자는 ID와 Password를 입력한다. |
+| 3 | 시스템은 중복된 계정 여부를 확인한다. |
+| 4 | 중복이 아니라면 DB에 사용자 정보를 저장한다. |
+| 5 | 회원가입이 완료되며 건강 정보 입력 화면으로 이동한다. |
+
+### EXTENSION SCENARIOS
+
+| Step | Branching Action |
+|---|---|
+| 3 | 3a. 이미 존재하는 ID인 경우 |
+|  | 3a.1. “이미 존재하는 아이디입니다.” 메시지를 출력한다. |
+|  | 3a.2. 회원가입 입력 화면으로 돌아간다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 5 Seconds |
+| Frequency | Variable |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+
+## Use Case #2 : Login
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | 등록된 사용자가 시스템 기능을 이용하기 위해 로그인하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | User Level |
+| Author | 김혜원 |
+| Last Update | 2026-05-08 |
+| Status | Analysis |
+| Primary Actor | User |
+| Preconditions | 사용자가 회원가입을 완료한 상태여야 한다. |
+| Trigger | 사용자가 로그인 버튼을 선택한다. |
+| Success Post Condition | 로그인에 성공하고 메인 화면으로 이동한다. |
+| Failed Post Condition | 로그인에 실패하고 로그인 화면으로 돌아간다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 사용자가 로그인할 때 시작된다. |
+| 1 | 사용자는 ID와 Password를 입력한다. |
+| 2 | 시스템은 DB와 회원 정보를 비교한다. |
+| 3 | 인증에 성공하면 사용자 선호 데이터와 추천 기록을 불러온다. |
+| 4 | 메인 추천 화면으로 이동하며 종료된다. |
+
+### EXTENSION SCENARIOS
+
+| Step | Branching Action |
+|---|---|
+| 2 | 2a. 아이디 또는 비밀번호가 잘못된 경우 |
+|  | 2a.1. “아이디 또는 비밀번호가 올바르지 않습니다.” 메시지를 출력한다. |
+|  | 2a.2. 로그인 입력 화면으로 돌아간다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 3 Seconds |
+| Frequency | Variable |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+
+## Use Case #3 : Input User Condition
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | 사용자가 메뉴 추천을 위한 선호 조건을 입력하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | User Level |
+| Author | 김혜원 |
+| Last Update | 2026-05-08 |
+| Status | Analysis |
+| Primary Actor | User |
+| Preconditions | 사용자가 로그인한 상태여야 한다. |
+| Trigger | 사용자가 메뉴 추천 시작 버튼을 누른다. |
+| Success Post Condition | 선택 조건이 추천 시스템으로 전달된다. |
+| Failed Post Condition | 조건 입력이 정상적으로 처리되지 않는다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 사용자가 메뉴 조건 입력을 시작할 때 시작된다. |
+| 1 | 시스템은 웰컴 애니메이션을 출력한다. |
+| 2 | 사용자는 먹기 싫은 카테고리를 선택한다. |
+| 3 | 사용자는 국물 유무를 선택한다. |
+| 4 | 사용자는 면/밥 여부를 선택한다. |
+| 5 | 사용자는 따뜻함/시원함 여부를 선택한다. |
+| 6 | 시스템은 입력 데이터를 추천 시스템으로 전달한다. |
+
+### EXTENSION SCENARIOS
+
+| Step | Branching Action |
+|---|---|
+| 2 | 2a. 아무 카테고리도 선택하지 않은 경우 |
+|  | 2a.1. 전체 메뉴를 기준으로 추천을 진행한다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 5 Seconds |
+| Frequency | Very Frequent |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+
+## Use Case #4 : Analyze Condition
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | 사용자 입력 조건을 분석하여 AI 추천용 데이터로 변환하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | System Level |
+| Author | 김혜원 |
+| Last Update | 2026-06-12 |
+| Status | Analysis |
+| Primary Actor | System |
+| Preconditions | 사용자 조건 데이터가 입력된 상태여야 한다. |
+| Trigger | 조건 입력이 완료된다. |
+| Success Post Condition | AI 프롬프트용 구조화 데이터가 생성된다. |
+| Failed Post Condition | 추천 분석이 실패한다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 시스템이 사용자 조건 분석을 시작한다. |
+| 1 | 시스템은 사용자 선택 데이터를 수신한다. |
+| 2 | MenuFilter가 조건 문자열을 생성한다. |
+| 3 | 건강 정보 데이터를 결합한다. |
+| 4 | 최종 프롬프트 구조 데이터를 생성한다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 2 Seconds |
+| Frequency | Frequent |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+
+## Use Case #5 : Filter Menu
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | 사용자 조건에 맞지 않는 메뉴를 제거하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | System Level |
+| Author | 김혜원 |
+| Last Update | 2026-05-08 |
+| Status | Analysis |
+| Primary Actor | System |
+| Preconditions | 조건 분석이 완료되어야 한다. |
+| Trigger | 추천 요청이 시작된다. |
+| Success Post Condition | 필터링된 메뉴 후보군이 생성된다. |
+| Failed Post Condition | 조건 필터링에 실패한다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 시스템이 메뉴 필터링을 시작한다. |
+| 1 | 제외 카테고리를 제거한다. |
+| 2 | 국물 여부 조건을 적용한다. |
+| 3 | 면/밥 조건을 적용한다. |
+| 4 | 온도 조건을 적용한다. |
+| 5 | 필터링 결과를 추천 시스템으로 전달한다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 2 Seconds |
+| Frequency | Frequent |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+
+## Use Case #6 : Recommend Menu
+
+| GENERAL CHARACTERISTICS | |
+|---|---|
+| Summary | AI를 이용하여 최종 메뉴를 추천하는 기능 |
+| Scope | AI Menu Recommendation System |
+| Level | System Level |
+| Author | 김혜원 |
+| Last Update | 2026-05-08 |
+| Status | Analysis |
+| Primary Actor | System / Groq AI |
+| Preconditions | 사용자 조건 필터링이 완료되어야 한다. |
+| Trigger | 추천 요청이 발생한다. |
+| Success Post Condition | 추천 메뉴 카드가 생성된다. |
+| Failed Post Condition | 추천 생성에 실패한다. |
+
+### MAIN SUCCESS SCENARIO
+
+| Step | Action |
+|---|---|
+| S | 시스템이 메뉴 추천을 시작한다. |
+| 1 | 구조화된 프롬프트를 생성한다. |
+| 2 | Groq API에 추천 요청을 전송한다. |
+| 3 | JSON 형식의 응답 데이터를 수신한다. |
+| 4 | 추천 메뉴 카드 3개를 생성한다. |
+| 5 | 추천 결과 화면을 출력한다. |
+
+### EXTENSION SCENARIOS
+
+| Step | Branching Action |
+|---|---|
+| 2 | 2a. API 호출 오류가 발생한 경우 |
+|  | 2a.1. 추천 오류 메시지를 출력한다. |
+|  | 2a.2. 추천 요청을 종료한다. |
+
+### RELATED INFORMATION
+
+| 항목 | 내용 |
+|---|---|
+| Performance | ≤ 5 Seconds |
+| Frequency | Very Frequent |
+| Concurrency | None |
+| Due Date | 2026-06-12 |
+
+---
+## 3. Domain Analysis <a name="domain"></a>
+| 클래스 | 역할 |
+|--------|------|
+| **DatabaseManager** | SQLite 연결 및 테이블 초기화 관리 |
+| **User** | 회원가입·로그인 데이터 처리, 비밀번호 해시 |
+| **AuthManager** | 입력 유효성 검증 후 User 호출 |
+| **UserPreference** | 건강 정보 & 선호 데이터 저장 및 조회 |
+| **MenuFilter** | 사용자 선택을 AI 프롬프트 조건 문자열로 변환 |
+| **GroqClientWrapper** | Groq API 통신 담당 (LLaMA 3.3 70B) |
+| **MenuRecommender** | 시스템 프롬프트 + 필터 조건으로 메뉴 추천·채팅 |
+| **ConversationHistory** | 멀티턴 대화 기록 관리 |
+| **ChatSession** | 세션 생성·저장·조회 (DB 연계) |
+| **AppController** | 모든 클래스를 초기화하고 Flask 라우트와 연결 |
+
+---
+
+## 4. User Interface Prototype <a name="uip"></a>
+#### Screen 1 — 로그인 / 회원가입
+<img width="1055" height="1388" alt="스크린샷 2026-05-08 200124" src="https://github.com/user-attachments/assets/30d365e3-9f5c-41e6-9687-4714976df5f8" />
+
+- 주황 그라데이션 배경, 흰색 카드
+- 탭 전환 (로그인 <-> 회원가입)
+
+#### Screen 2 — 메뉴 추천시 주의사항 입력 
+
+<img width="1114" height="1330" alt="스크린샷 2026-05-08 201634" src="https://github.com/user-attachments/assets/999cb2e2-0111-46a5-9782-7412f2aceea3" />
+- 최초 1회 입력한 사용자의 건강 정보 및 불호 식재료와를 기반으로 메뉴 추천을 한다.
+
+#### Screen 3 — 웰컴 애니메이션 
+<img width="882" height="666" alt="스크린샷 2026-05-08 201706" src="https://github.com/user-attachments/assets/021c4928-579e-4aef-b29f-1624a1f4a5d9" />
+
+- 주황색 반투명 동그라미들이 파동처럼 확장 
+- 중앙 텍스트(안내사항):
+  > "그닥 안 당기는 카테고리를 골라주시면  
+  > 그 카테고리는 제외하고 메뉴를 추천해 드릴게요!"
+- 3초 후 카테고리 선택 화면으로 자동 전환
+
+#### Screen 4 — 카테고리 제외 선택
+
+<img width="1073" height="1304" alt="스크린샷 2026-05-08 201903" src="https://github.com/user-attachments/assets/19ae4e25-ed08-46e4-918d-56fa3a4d7ae9" />
+- 그다지 당기지 않는 음식을 소거하여 범위를 좁혀나가기 위해 먹기 싫은 카테고리를 선택
+- 선택된 항목은 주황 테두리를 강조하여 선택되지 않은 것과 구분
+  
+#### Screen 5 — 선호도 선택 (3단계)
+
+**Step 1:**
+<img width="1028" height="844" alt="스크린샷 2026-05-08 201918" src="https://github.com/user-attachments/assets/6116b71a-a502-4c84-ac28-c40bf7ad79ca" />
+- 국물이 있는 음식과 국물이 없는 음식 중에서 어떤 항목이 당기는지 선택
+- 상단 프로그레스 바 1단계 표시
+
+**Step 2:**
+<img width="882" height="772" alt="스크린샷 2026-05-08 201932" src="https://github.com/user-attachments/assets/4c02ae83-74e5-4b0a-8981-4f73fdccbb01" />
+- 면과 밥 중에서 어떤 항목이 당기는지 선택
+- 상단 프로그레스 바 2단계 표시
+
+**Step 3:**
+<img width="926" height="768" alt="스크린샷 2026-05-08 201941" src="https://github.com/user-attachments/assets/ca92aff0-d2f5-4d48-95fd-33d253b0ea52" />
+- 따뜻한 음식과 시원한 음식 중에서 어떤 항목이 당기는지 선택
+- 항목 선택 시 0.5초 후 자동으로 다음 단계 이동
+- 상단 프로그레스 바 3단계 표시
+
+#### Screen 6 — 추천 결과 + 채팅
+
+<img width="2738" height="1312" alt="스크린샷 2026-05-08 202958" src="https://github.com/user-attachments/assets/df27eede-b55f-43ca-a67b-6d8ddab695f6" />
+
+---
+
+## 5. Glossary <a name="glossary"></a>
+
+| 용어 | 설명 |
+|------|------|
+| **Recommendation System** | 사용자의 요구사항, 선호도, 조건 등을 분석하여 적절한 메뉴를 선택하고 제안하는 시스템 |
+| **Natural Language Input** | 사용자가 일상 언어 형태로 입력하는 문장 데이터 |
+| **Menu Database** | 메뉴 이름, 카테고리, 재료, 태그 등의 정보를 저장하는 데이터 집합 |
+| **Filter** | 사용자 조건에 맞지 않는 메뉴를 제거하여 후보군을 줄이는 과정 |
+| **Preference** | 사용자가 선호하는 음식 또는 조건으로 추천 결과에 긍정적으로 반영되는 요소 |
+| **Non-preference** | 사용자가 기피하거나 제한하는 음식 또는 조건 |
+| **Re-recommendation** | 추천 결과에 만족하지 않을 경우 새로운 조건을 반영하여 재추천하는 기능 |
+| **Context** | 사용자의 현재 상황(시간, 기분, 날씨, 식사 목적 등)을 의미하며 추천에 영향을 미치는 요소 |
+| **Groq API** | Meta의 LLaMA 모델을 매우 빠른 속도로 추론해주는 무료 AI API 서비스 |
+| **LLaMA 3.3 70B** | Meta가 개발한 700억 파라미터 규모의 오픈소스 대형 언어 모델 |
+| **System Prompt** | AI의 역할과 행동 방식을 정의하는 초기 지시문 |
+| **Multi-turn Dialog** | 이전 대화를 기억하며 이어지는 연속 대화 방식 |
+| **SPA** | Single Page Application — 페이지 전환 없이 화면을 동적으로 전환하는 웹앱 구조 |
+| **SQLite** | 파일 기반 경량 관계형 데이터베이스 |
+| **Free Tier** | 무료로 사용 가능한 API 서비스 요금제 |
+
+---
+
+## 6. References <a name="ref"></a>
+
+- Groq API Documentation: https://console.groq.com/docs
+- SQLite Documentation: https://www.sqlite.org/docs.html
+
+---
