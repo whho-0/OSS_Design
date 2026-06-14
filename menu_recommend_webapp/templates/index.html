@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍽️ AI 메뉴 추천봇</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{--o1:#FF6B35;--o2:#FF8C42;--o3:#FFA726;--lo:#FFE0CC;--vl:#FFF8F3;--dk:#3D1C00;--w:#fff}
+body{background:linear-gradient(135deg,#FF6B35 0%,#FF8C42 45%,#FFA726 100%);min-height:100vh;overflow:hidden}
+.bg-circles{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden}
+.bgc{position:absolute;border-radius:50%;background:rgba(255,255,255,.1)}
+.bgc:nth-child(1){width:320px;height:320px;top:-110px;right:-60px;animation:flt 8s ease-in-out infinite}
+.bgc:nth-child(2){width:220px;height:220px;bottom:-60px;left:-80px;animation:flt 6s ease-in-out infinite 2s}
+.bgc:nth-child(3){width:160px;height:160px;top:42%;right:8%;animation:flt 7s ease-in-out infinite 1s}
+@keyframes flt{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-22px) scale(1.06)}}
+.screen{position:fixed;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:1;overflow-y:auto}
+.screen.active{display:flex;animation:fadein .4s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+/* Card */
+.card{background:rgba(255,255,255,.96);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.logo{font-size:52px;text-align:center;margin-bottom:6px}
+.logo-t{font-size:24px;font-weight:800;color:var(--dk);text-align:center;margin-bottom:4px}
+.logo-s{font-size:13px;color:#888;text-align:center;margin-bottom:28px}
+/* Tabs */
+.tabs{display:flex;background:#f5f5f5;border-radius:12px;padding:4px;margin-bottom:22px}
+.tab-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:10px;font-size:14px;font-weight:600;color:#888;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:white;color:var(--o1);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+/* Form */
+.fg{margin-bottom:15px}
+.fl{font-size:13px;font-weight:600;color:var(--dk);margin-bottom:6px;display:block}
+.fi{width:100%;padding:13px 15px;border:2px solid #eee;border-radius:12px;font-size:15px;outline:none;color:var(--dk);transition:border-color .2s}
+.fi:focus{border-color:var(--o1)}
+.fta{width:100%;padding:13px 15px;border:2px solid #eee;border-radius:12px;font-size:14px;outline:none;resize:vertical;min-height:110px;color:var(--dk);transition:border-color .2s}
+.fta:focus{border-color:var(--o1)}
+/* Buttons */
+.btn-p{width:100%;padding:15px;background:linear-gradient(135deg,var(--o1),var(--o2));color:white;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(255,107,53,.4);transition:transform .2s,box-shadow .2s;margin-top:4px}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,53,.5)}
+.btn-s{width:100%;padding:13px;background:white;color:var(--o1);border:2px solid var(--o1);border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;transition:background .2s}
+.btn-s:hover{background:var(--lo)}
+.err{background:#ffe5e5;color:#c00;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+/* Health */
+.hbox{background:#fff3ee;border-radius:14px;padding:16px;margin-bottom:18px;color:var(--dk);font-size:14px;line-height:1.6}
+/* Welcome */
+#sw{background:transparent}
+.wc-wrap{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center}
+.rp{position:absolute;border-radius:50%;background:rgba(255,210,100,.35);animation:rpo 2.6s ease-out infinite}
+.rp:nth-child(1){width:110px;height:110px;animation-delay:0s}
+.rp:nth-child(2){width:110px;height:110px;animation-delay:.65s}
+.rp:nth-child(3){width:110px;height:110px;animation-delay:1.3s}
+.rp:nth-child(4){width:110px;height:110px;animation-delay:1.95s}
+@keyframes rpo{0%{transform:scale(1);opacity:.85;background:rgba(255,220,80,.5)}100%{transform:scale(5.5);opacity:0}}
+.wt{position:relative;z-index:2;text-align:center;color:white;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.wt .we{font-size:68px;margin-bottom:14px;display:block}
+.wt .wm{font-size:20px;font-weight:700;line-height:1.55;max-width:300px}
+/* Screens title */
+.stitle{color:white;font-size:22px;font-weight:800;text-align:center;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ssub{color:rgba(255,255,255,.85);font-size:14px;text-align:center;margin-bottom:22px}
+/* Category */
+.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;width:100%;max-width:380px}
+.cbt{padding:18px;background:rgba(255,255,255,.92);border:3px solid transparent;border-radius:16px;font-size:20px;text-align:center;cursor:pointer;transition:all .2s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.cbt span{display:block;font-size:12px;color:#666;margin-top:4px;font-weight:600}
+.cbt.sel{background:rgba(255,80,20,.12);border-color:var(--o1);color:var(--o1)}
+.cbt.sel span{color:var(--o1)}
+.btn-row{display:flex;gap:12px;margin-top:22px;width:100%;max-width:380px}
+.brs{padding:13px 22px;background:rgba(255,255,255,.85);color:var(--o1);border:2px solid var(--o1);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+.brs:hover{background:var(--lo)}
+/* Pref */
+.pc{background:rgba(255,255,255,.96);border-radius:24px;padding:34px 26px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.15);text-align:center}
+.pq{font-size:19px;font-weight:700;color:var(--dk);margin-bottom:6px}
+.ps{font-size:13px;color:#888;margin-bottom:26px}
+.popts{display:flex;gap:12px}
+.popt{flex:1;padding:18px 10px;border:3px solid #eee;border-radius:16px;background:white;cursor:pointer;transition:all .2s;font-size:26px;text-align:center}
+.popt .lb{font-size:14px;font-weight:700;color:var(--dk);margin-top:7px}
+.popt .sb{font-size:11px;color:#aaa}
+.popt:hover{border-color:var(--o1);background:var(--lo)}
+.popt.sel{border-color:var(--o1);background:linear-gradient(135deg,#fff3ee,#ffe5d5)}
+.prog{width:100%;max-width:380px;height:5px;background:rgba(255,255,255,.3);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.progf{height:100%;background:white;border-radius:3px;transition:width .4s ease}
+.dots{display:flex;gap:9px;justify-content:center;margin-bottom:22px}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .2s}
+.dot.act{background:white}
+/* Main layout */
+#sm{justify-content:flex-start;padding:0;overflow:hidden}
+.layout{display:flex;width:100%;height:100vh}
+.sidebar{width:255px;background:rgba(0,0,0,.18);padding:22px 14px;overflow-y:auto;flex-shrink:0}
+.sb-logo{color:white;font-size:17px;font-weight:800;margin-bottom:3px}
+.sb-user{color:rgba(255,255,255,.6);font-size:12px;margin-bottom:18px}
+.btn-new{width:100%;padding:10px;background:rgba(255,255,255,.22);color:white;border:2px solid rgba(255,255,255,.45);border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:16px;transition:background .2s}
+.btn-new:hover{background:rgba(255,255,255,.33)}
+.sb-title{color:white;font-size:13px;font-weight:700;opacity:.7;margin-bottom:10px}
+.ss-item{padding:11px 12px;border-radius:10px;color:white;font-size:13px;cursor:pointer;margin-bottom:7px;background:rgba(255,255,255,.1);transition:background .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ss-item:hover{background:rgba(255,255,255,.2)}
+.ss-item.act{background:rgba(255,255,255,.25)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:15px 22px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.13)}
+.topbar-t{color:white;font-size:18px;font-weight:800}
+.topbar-r{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.85);font-size:13px}
+.btn-lo{padding:6px 12px;background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.4);border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-lo:hover{background:rgba(255,255,255,.1);color:white}
+.chat-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+/* Rec Cards */
+.rec-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.rc{flex:1;min-width:170px;max-width:260px;background:rgba(255,255,255,.96);border-radius:18px;padding:18px 15px;box-shadow:0 4px 16px rgba(0,0,0,.12);transition:transform .2s}
+.rc:hover{transform:translateY(-3px)}
+.rc .em{font-size:36px;margin-bottom:7px}
+.rc .nm{font-size:15px;font-weight:800;color:var(--dk);margin-bottom:3px}
+.rc .ct{font-size:11px;color:var(--o1);font-weight:600;margin-bottom:7px}
+.rc .dc{font-size:13px;color:#555;margin-bottom:7px}
+.rc .rs{font-size:12px;color:#888;background:var(--vl);padding:8px;border-radius:8px}
+/* Chat */
+.msg{display:flex;gap:9px}
+.msg.user{flex-direction:row-reverse}
+.mb{max-width:72%;padding:11px 16px;border-radius:18px;font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.msg.user .mb{background:linear-gradient(135deg,var(--o1),var(--o2));color:white;border-bottom-right-radius:4px}
+.msg.assistant .mb{background:rgba(255,255,255,.96);color:var(--dk);border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.msg.user .av{background:var(--o2)}
+.msg.assistant .av{background:rgba(255,255,255,.9)}
+.input-area{padding:14px 22px;background:rgba(255,255,255,.13);display:flex;gap:10px;align-items:center}
+.ci{flex:1;padding:13px 17px;background:rgba(255,255,255,.96);border:none;border-radius:13px;font-size:15px;outline:none;color:var(--dk)}
+.sb-btn{width:48px;height:48px;background:linear-gradient(135deg,var(--o1),var(--o2));border:none;border-radius:13px;color:white;font-size:19px;cursor:pointer;flex-shrink:0;transition:transform .2s}
+.sb-btn:hover{transform:scale(1.06)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,107,53,.3);border-top-color:var(--o1);border-radius:50%;animation:spin .8s linear infinite}
+@media(max-width:640px){.sidebar{display:none}.rc{min-width:130px}.mb{max-width:86%}}
+</style>
+</head>
+<body>
+<div class="bg-circles"><div class="bgc"></div><div class="bgc"></div><div class="bgc"></div></div>
+
+<!-- S1: Auth -->
+<div id="sa" class="screen active">
+  <div class="card">
+    <div class="logo">🍽️</div>
+    <div class="logo-t">AI 메뉴 추천봇</div>
+    <div class="logo-s">오늘도 맛있는 하루를 시작해요!</div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="swTab('login')">로그인</button>
+      <button class="tab-btn" onclick="swTab('register')">회원가입</button>
+    </div>
+    <div id="tl">
+      <div class="err" id="le"></div>
+      <div class="fg"><label class="fl">아이디</label><input type="text" class="fi" id="lid" placeholder="아이디 입력" autocomplete="username"></div>
+      <div class="fg"><label class="fl">비밀번호</label><input type="password" class="fi" id="lpw" placeholder="비밀번호 입력" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-p" onclick="doLogin()">로그인</button>
+    </div>
+    <div id="tr" style="display:none">
+      <div class="err" id="re"></div>
+      <div class="fg"><label class="fl">아이디</label><input type="text" class="fi" id="rid" placeholder="아이디 (2자 이상)" autocomplete="username"></div>
+      <div class="fg"><label class="fl">비밀번호</label><input type="password" class="fi" id="rpw" placeholder="비밀번호 (4자 이상)" autocomplete="new-password"></div>
+      <div class="fg"><label class="fl">비밀번호 확인</label><input type="password" class="fi" id="rpw2" placeholder="비밀번호 재입력" autocomplete="new-password"></div>
+      <button class="btn-p" onclick="doRegister()">회원가입</button>
+    </div>
+  </div>
+</div>
+
+<!-- S2: Health -->
+<div id="sh" class="screen">
+  <div class="card">
+    <div class="logo">👋</div>
+    <div class="logo-t">처음 오셨군요!</div>
+    <div class="logo-s">잠깐, 저에게 알려주세요 😊</div>
+    <div class="hbox">
+      현재 건강 상태는 어떠신가요? 제가 메뉴 선정에 주의해야 할 점이 있나요?<br>
+      <span style="color:#888;font-size:12px;margin-top:4px;display:block">싫어하는 음식이나 알레르기가 있으면 저에게 말씀해 주세요.</span>
+    </div>
+    <div class="fg"><textarea class="fta" id="hi" placeholder="예) 당뇨가 있어서 단 음식은 자제해야 해요. 견과류 알레르기가 있고, 고수를 못 먹어요."></textarea></div>
+    <button class="btn-p" onclick="saveHealth()">저장하고 시작하기</button>
+    <button class="btn-s" onclick="saveHealth(true)">건강 이상 없음, 바로 시작</button>
+  </div>
+</div>
+
+<!-- S3: Welcome -->
+<div id="sw" class="screen">
+  <div class="wc-wrap"><div class="rp"></div><div class="rp"></div><div class="rp"></div><div class="rp"></div></div>
+  <div class="wt">
+    <span class="we">🍽️</span>
+    <div class="wm">그닥 안 당기는 카테고리를 골라주시면<br>그 카테고리는 제외하고<br>메뉴를 추천해 드릴게요!</div>
+  </div>
+</div>
+
+<!-- S4: Category -->
+<div id="sc" class="screen">
+  <div class="stitle">🙅 오늘 먹기 싫은 카테고리</div>
+  <div class="ssub">선택한 카테고리는 추천에서 제외됩니다 (복수 선택 가능)</div>
+  <div class="cgrid">
+    <div class="cbt" data-cat="한식" onclick="togCat(this)">🍚<span>한식</span></div>
+    <div class="cbt" data-cat="중식" onclick="togCat(this)">🥟<span>중식</span></div>
+    <div class="cbt" data-cat="일식" onclick="togCat(this)">🍣<span>일식</span></div>
+    <div class="cbt" data-cat="양식" onclick="togCat(this)">🍝<span>양식</span></div>
+    <div class="cbt" data-cat="분식" onclick="togCat(this)">🍢<span>분식</span></div>
+    <div class="cbt" data-cat="아시안" onclick="togCat(this)">🍜<span>아시안</span></div>
+    <div class="cbt" data-cat="패스트푸드" onclick="togCat(this)">🍔<span>패스트푸드</span></div>
+  </div>
+  <div class="btn-row">
+    <button class="brs" onclick="clearCats()">전체 해제</button>
+    <button class="btn-p" style="flex:1;margin-top:0" onclick="goPrefs()">다음 →</button>
+  </div>
+</div>
+
+<!-- S5: Prefs -->
+<div id="sp" class="screen">
+  <div class="prog" style="max-width:380px;width:100%"><div class="progf" id="pf" style="width:33%"></div></div>
+  <div class="dots"><div class="dot act" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
+  <div id="ps0" class="pc">
+    <div class="pq">국물이 있는 음식 VS 없는 음식</div>
+    <div class="ps">오늘 어떤 스타일이 당기세요?</div>
+    <div class="popts">
+      <div class="popt" onclick="selPref('soup','있음',this)">🍲<div class="lb">국물 있음</div><div class="sb">찌개·탕·라면</div></div>
+      <div class="popt" onclick="selPref('soup','없음',this)">🍱<div class="lb">국물 없음</div><div class="sb">볶음·구이·튀김</div></div>
+      <div class="popt" onclick="selPref('soup','상관없음',this)">🤷<div class="lb">상관없음</div><div class="sb">둘 다 OK</div></div>
+    </div>
+  </div>
+  <div id="ps1" class="pc" style="display:none">
+    <div class="pq">면 VS 밥</div>
+    <div class="ps">탄수화물 선택!</div>
+    <div class="popts">
+      <div class="popt" onclick="selPref('type','면',this)">🍜<div class="lb">면</div><div class="sb">파스타·우동·국수</div></div>
+      <div class="popt" onclick="selPref('type','밥',this)">🍚<div class="lb">밥</div><div class="sb">볶음밥·덮밥·비빔밥</div></div>
+      <div class="popt" onclick="selPref('type','상관없음',this)">🤷<div class="lb">상관없음</div><div class="sb">둘 다 OK</div></div>
+    </div>
+  </div>
+  <div id="ps2" class="pc" style="display:none">
+    <div class="pq">따뜻한 음식 VS 시원한 음식</div>
+    <div class="ps">오늘 몸 상태는요?</div>
+    <div class="popts">
+      <div class="popt" onclick="selPref('temp','따뜻한',this)">🔥<div class="lb">따뜻한</div><div class="sb">뜨끈하게</div></div>
+      <div class="popt" onclick="selPref('temp','시원한',this)">❄️<div class="lb">시원한</div><div class="sb">시원하게</div></div>
+      <div class="popt" onclick="selPref('temp','상관없음',this)">🤷<div class="lb">상관없음</div><div class="sb">둘 다 OK</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: Main -->
+<div id="sm" class="screen">
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sb-logo">🍽️ 메뉴봇</div>
+      <div class="sb-user" id="sbu"></div>
+      <button class="btn-new" onclick="startNew()">+ 새 추천 받기</button>
+      <div class="sb-title">이전 추천 기록</div>
+      <div id="ssl"></div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-t">🍽️ AI 메뉴 추천봇</div>
+        <div class="topbar-r"><span id="tbu"></span><button class="btn-lo" onclick="doLogout()">로그아웃</button></div>
+      </div>
+      <div class="chat-area" id="ca"></div>
+      <div class="input-area">
+        <input type="text" class="ci" id="ci" placeholder="추가 요청사항 입력... (예: 혼밥이에요, 5000원 이하로요)" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="sb-btn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const S={user:null,disliked:[],prefs:{soup:null,type:null,temp:null},step:0,sid:null,hist:[]};
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none'});const e=document.getElementById(id);e.style.display='flex';e.classList.add('active')}
+function swTab(t){document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(t==='login'&&i===0)||(t==='register'&&i===1)));document.getElementById('tl').style.display=t==='login'?'block':'none';document.getElementById('tr').style.display=t==='register'?'block':'none'}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+function hideErr(id){document.getElementById(id).style.display='none'}
+
+async function doLogin(){
+  hideErr('le');
+  const username=document.getElementById('lid').value.trim(),password=document.getElementById('lpw').value;
+  if(!username||!password){showErr('le','아이디와 비밀번호를 입력해주세요');return}
+  const d=await(await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})})).json();
+  if(!d.ok){showErr('le',d.error);return}
+  S.user={username:d.username};setUser(d.username);
+  d.setup_done?goMain():show('sh');
+}
+
+async function doRegister(){
+  hideErr('re');
+  const username=document.getElementById('rid').value.trim(),password=document.getElementById('rpw').value,confirm=document.getElementById('rpw2').value;
+  const d=await(await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,confirm})})).json();
+  if(!d.ok){showErr('re',d.error);return}
+  S.user={username};setUser(username);show('sh');
+}
+
+async function doLogout(){await fetch('/api/logout',{method:'POST'});S.user=null;show('sa')}
+
+function setUser(u){document.getElementById('sbu').textContent=u+' 님';document.getElementById('tbu').textContent=u+' 님'}
+
+async function saveHealth(skip=false){
+  const h=skip?'':document.getElementById('hi').value.trim();
+  await fetch('/api/save_health',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({health_info:h})});
+  startWelcome();
+}
+
+function startWelcome(){show('sw');setTimeout(()=>show('sc'),3000)}
+
+function togCat(el){el.classList.toggle('sel');const c=el.dataset.cat;el.classList.contains('sel')?S.disliked.push(c):S.disliked=S.disliked.filter(x=>x!==c)}
+function clearCats(){S.disliked=[];document.querySelectorAll('.cbt').forEach(b=>b.classList.remove('sel'))}
+function goPrefs(){S.step=0;S.prefs={soup:null,type:null,temp:null};updPref();show('sp')}
+
+function selPref(k,v,el){
+  el.parentElement.querySelectorAll('.popt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');S.prefs[k]=v;
+  setTimeout(()=>{if(S.step<2){S.step++;updPref()}else getRec()},480);
+}
+
+function updPref(){
+  ['ps0','ps1','ps2'].forEach((id,i)=>document.getElementById(id).style.display=i===S.step?'block':'none');
+  for(let i=0;i<3;i++)document.getElementById('d'+i).classList.toggle('act',i===S.step);
+  document.getElementById('pf').style.width=[33,66,100][S.step]+'%';
+}
+
+async function getRec(){
+  goMain();
+  const ca=document.getElementById('ca');ca.innerHTML='';
+  addMsg('assistant','⏳ 메뉴를 추천하고 있어요...',true);
+  const d=await(await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({disliked:S.disliked,soup:S.prefs.soup||'상관없음',type:S.prefs.type||'상관없음',temp:S.prefs.temp||'상관없음'})})).json();
+  ca.innerHTML='';S.hist=[];
+  if(!d.ok){addMsg('assistant','❌ 오류: '+(d.error||'알 수 없는 오류'));return}
+  S.sid=d.session_id;
+  const ms=d.result.menus||[];
+  const w=document.createElement('div');
+  w.innerHTML=`<div style="margin-bottom:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:600">✨ 오늘의 추천 메뉴</div><div class="rec-cards">${ms.map(m=>`<div class="rc"><div class="em">${m.emoji||'🍽️'}</div><div class="nm">${m.name}</div><div class="ct">${m.category||''}</div><div class="dc">${m.description||''}</div><div class="rs">${m.reason||''}</div></div>`).join('')}</div><div style="color:rgba(255,255,255,.7);font-size:13px;margin-top:8px">💬 마음에 드는 메뉴가 없으신가요? 아래 채팅창에 추가 요청을 해주세요!</div>`;
+  ca.appendChild(w);
+  S.hist.push({role:'assistant',content:`추천 메뉴: ${ms.map(m=>m.name).join(', ')}`});
+  ca.scrollTop=ca.scrollHeight;loadSess();
+}
+
+function goMain(){show('sm');loadSess()}
+
+function addMsg(role,content,ld=false){
+  const ca=document.getElementById('ca');
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML=`<div class="av">${role==='user'?'👤':'🤖'}</div><div class="mb">${ld?'<span class="ld"></span>':content.replace(/\n/g,'<br>')}</div>`;
+  ca.appendChild(d);ca.scrollTop=ca.scrollHeight;return d;
+}
+
+async function sendChat(){
+  const inp=document.getElementById('ci');const msg=inp.value.trim();if(!msg)return;inp.value='';
+  addMsg('user',msg);S.hist.push({role:'user',content:msg});
+  const ldiv=addMsg('assistant','',true);
+  const d=await(await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,session_id:S.sid})})).json();
+  ldiv.remove();
+  if(d.ok){addMsg('assistant',d.reply);S.hist.push({role:'assistant',content:d.reply})}
+  else addMsg('assistant','❌ '+(d.error||'오류'));
+}
+
+async function loadSess(){
+  const d=await(await fetch('/api/sessions')).json();if(!d.ok)return;
+  const sl=document.getElementById('ssl');sl.innerHTML='';
+  d.sessions.forEach(s=>{const el=document.createElement('div');el.className='ss-item'+(s.id===S.sid?' act':'');el.textContent=s.title;el.onclick=()=>loadSessById(s.id);sl.appendChild(el)});
+}
+
+async function loadSessById(id){
+  S.sid=id;
+  const d=await(await fetch('/api/session/'+id)).json();
+  const ca=document.getElementById('ca');ca.innerHTML='';S.hist=[];
+  d.messages.forEach(m=>{
+    if(m.role==='user'){addMsg('user',m.content)}
+    else{try{const r=JSON.parse(m.content);if(r.menus){const ms=r.menus;const w=document.createElement('div');w.innerHTML=`<div style="margin-bottom:8px;color:rgba(255,255,255,.8);font-size:13px;font-weight:600">✨ 추천 메뉴</div><div class="rec-cards">${ms.map(m2=>`<div class="rc"><div class="em">${m2.emoji||'🍽️'}</div><div class="nm">${m2.name}</div><div class="ct">${m2.category||''}</div><div class="dc">${m2.description||''}</div><div class="rs">${m2.reason||''}</div></div>`).join('')}</div>`;ca.appendChild(w);return;}}catch(e){}addMsg('assistant',m.content);}
+    S.hist.push({role:m.role,content:m.content});
+  });
+  ca.scrollTop=ca.scrollHeight;loadSess();
+}
+
+function startNew(){S.disliked=[];S.prefs={soup:null,type:null,temp:null};document.querySelectorAll('.cbt').forEach(b=>b.classList.remove('sel'));startWelcome()}
+
+window.addEventListener('load',async()=>{
+  const d=await(await fetch('/api/me')).json();
+  if(d.ok){S.user=d.user;setUser(d.user.username);d.setup_done?goMain():show('sh')}
+  else show('sa');
+});
+</script>
+</body>
+</html>
