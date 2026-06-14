@@ -1,0 +1,4 @@
+flask>=2.3
+groq>=0.9
+python-dotenv
+gunicorn
