@@ -196,7 +196,10 @@ class GroqClientWrapper:
 
     def chat(self, messages):
         resp = self.client.chat.completions.create(
-            model=self.model, messages=messages, temperature=0.8, max_tokens=1024
+            model=self.model,
+            messages=messages,
+            temperature=0.3,
+            max_tokens=1024
         )
         return resp.choices[0].message.content
 
@@ -205,16 +208,43 @@ class GroqClientWrapper:
 # Class 8: MenuRecommender
 # ══════════════════════════════════════════
 class MenuRecommender:
-    SYSTEM = """당신은 친절하고 전문적인 메뉴 추천 AI입니다.
-사용자의 조건과 건강 상태를 반드시 반영하여 메뉴를 추천하세요.
+    SYSTEM = """
+당신은 한국인을 위한 AI 메뉴 추천 시스템이다.
+
+반드시 자연스럽고 완전한 한국어로만 답변해야 한다.
+일본어, 중국어, 한자, 영어를 절대 섞지 마라.
+모든 메뉴 설명과 추천 이유도 한국어만 사용한다.
+
+사용자의 조건과 건강 상태를 반드시 반영하여 메뉴를 추천한다.
+
 반드시 아래 JSON 형식으로만 응답하세요 (다른 텍스트 금지):
+
 {
   "menus": [
-    {"name": "메뉴명", "emoji": "이모지", "category": "카테고리", "description": "한줄설명", "reason": "추천이유"},
-    {"name": "메뉴명", "emoji": "이모지", "category": "카테고리", "description": "한줄설명", "reason": "추천이유"},
-    {"name": "메뉴명", "emoji": "이모지", "category": "카테고리", "description": "한줄설명", "reason": "추천이유"}
+    {
+      "name": "메뉴명",
+      "emoji": "이모지",
+      "category": "카테고리",
+      "description": "한줄설명",
+      "reason": "추천이유"
+    },
+    {
+      "name": "메뉴명",
+      "emoji": "이모지",
+      "category": "카테고리",
+      "description": "한줄설명",
+      "reason": "추천이유"
+    },
+    {
+      "name": "메뉴명",
+      "emoji": "이모지",
+      "category": "카테고리",
+      "description": "한줄설명",
+      "reason": "추천이유"
+    }
   ]
-}"""
+}
+"""
 
     def __init__(self, groq: GroqClientWrapper):
         self.groq = groq
@@ -228,8 +258,24 @@ class MenuRecommender:
         try:
             start, end = raw.find("{"), raw.rfind("}") + 1
             return json.loads(raw[start:end])
-        except Exception:
-            return {"menus": [{"name": "추천 실패", "emoji": "⚠️", "category": "", "description": raw[:100], "reason": "JSON 파싱 오류"}]}
+        except Exception as e:
+            print("===== RAW RESPONSE =====")
+            print(raw)
+
+            print("===== ERROR =====")
+            print(e)
+
+            return {
+                "menus": [
+                    {
+                        "name": "추천 실패",
+                        "emoji": "⚠️",
+                        "category": "",
+                        "description": raw[:100],
+                        "reason": "JSON 파싱 오류"
+                    }
+                ]
+            }
 
     def chat_refine(self, history, user_msg, health_info):
         system = f"당신은 친절한 메뉴 추천 AI입니다. 건강 정보: {health_info or '없음'}. 이전 추천 맥락을 유지하며 한국어로 답하세요."
